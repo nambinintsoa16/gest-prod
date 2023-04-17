@@ -1,0 +1,87 @@
+{
+    "couleur_base": "light-blue2",
+    "couleur_nav": "info",
+    "title": "PRODUCTION",
+    "menu": [{
+            "text": "Accueil",
+            "icon": "flaticon-home",
+            "link": "Production"
+        }, {
+            "text": "Planning",
+            "icon": "flaticon-calendar",
+            "link": "Production/Planning"
+        }, {
+            "text": "Verification matieres",
+            "icon": "icon-note",
+            "link": "Production/Verification_matieres"
+        }, {
+            "text": "Sachet",
+            "icon": "flaticon-interface-7",
+            "link": "",
+            "sous_menu": [{
+                    "text": "Extrusion",
+                    "icon": "",
+                    "link": "Production/Sachet/Extrusion"
+                },
+                {
+                    "text": "Impression",
+                    "icon": "",
+                    "link": "Production/Sachet/Impression"
+                },
+                {
+                    "text": "Supprimer matiere",
+                    "icon": "",
+                    "link": "Production/Sachet/Supprimer_matiere"
+                },
+                {
+                    "text": "Coupe",
+                    "icon": "",
+                    "link": "Production/Sachet/Coupe"
+                }
+            ]
+        },
+        {
+            "text": "Cintre",
+            "icon": "flaticon-chain",
+            "link": "",
+            "sous_menu": [{
+                    "text": "Injection",
+                    "icon": "",
+                    "link": "Production/Cintre/Injection"
+                },
+                {
+                    "text": "Impression",
+                    "icon": "",
+                    "link": "Production/Cintre/Impression"
+                },
+                {
+                    "text": "Hook",
+                    "icon": "",
+                    "link": "Production/Cintre/Hook"
+                }
+            ]
+        },
+        {
+            "text": "Costing",
+            "icon": "flaticon-coins",
+            "link": "Production/Costing"
+        },
+
+        {
+            "text": "Stock Produit finis",
+            "icon": "flaticon-database",
+            "link": "",
+            "sous_menu": [{
+                    "text": "Plasmad",
+                    "icon": "",
+                    "link": "Production/Stock_Produit_finis/Plasmad"
+                },
+                {
+                    "text": "Madakem",
+                    "icon": "",
+                    "link": "Production/Stock_Produit_finis/Madakem"
+                }
+            ]
+        }
+    ]
+}

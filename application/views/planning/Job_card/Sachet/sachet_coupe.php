@@ -38,10 +38,8 @@
              <a href="#" class="btn btn-success btn-sm btn-update-statu" type="mise_en_prod" machine="<?=$id_machine?>"><i class="icon-wrench"></i> Mise en production</a>
 			 <a href="#" class="btn btn-info btn-sm update_date" machine="<?=$id_machine?>"><i class="fa fa-upload"></i> Mettre à jour la date</a>
              <a href="#" class="btn btn-warning btn-sm edit_production" machine="<?=$id_machine?>"><i class="fa fa-edit"></i> Mettre à jour les données</a>
-			 <a href="#" class="btn btn-secondary btn-sm new_pross" machine="<?=$id_machine?>"><i class="fa fa-arrow-right"></i> Nouveau</a>
 			 <a href="#" class="btn btn-dark btn-sm btn-update-statu" type="terminer" machine="<?=$id_machine?>"><i class="fa fa-check"></i> Términer</a>
 			 <a href="#" class="btn btn-danger btn-sm btn-update-statu" type="supprimer" machine="<?=$id_machine?>"><i class="fa fa-times"></i> Supprimer</a>
-             <a href="#" class="btn btn-secondary btn-sm add_purge" machine="<?=$id_machine?>"><i class="fa fa-plus-circle"></i>&nbsp;Purge</a>
              <button class="btn btn-primary add_prod  btn-sm" machine="<?=$id_machine?>"><i class="fa fa-plus-circle"></i>&nbsp;Ajouter</button>
     </fieldset>
     <fieldset class="border p-0 bg-white table-responsive">

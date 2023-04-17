@@ -363,7 +363,59 @@ class Planning extends My_Controller
 		);
 		echo json_encode($output);
 	}
+	
+	public function current_production_sachet_coupe()
+	{
+		$this->load->model('global');
+		$this->load->model('jobcart_sachet_coupe');
+		$this->load->model('machine');
+		$machine = $this->input->get('machine');
+		$machine = str_replace("_", " ", $machine);
+		$param = ["JO_MACHINE" => $machine,"JO_STATUT"=>"PLANIFIER"];
+		$datas = $this->jobcart_sachet_coupe->select_job_card_commande($param);
+		$data_machine = $this->machine->get_detail_machine(['MA_DESIGNATION' => $machine]);
+		$data = array();
+		foreach ($datas as $key => $row) {
+			$produit = $this->global->get_sum_colum(["JO_ID" => $row->JO_ID], "JO_AV", "jobcart_sachet_coupe");
+			$sortie = $this->global->get_sum_colum(["JO_ID" => $row->JO_ID], "JO_SORTIE", "jobcart_sachet_coupe");
+			$sub_array = array();
+			$sub_array[] = $row->JO_IDS;
+			$sub_array[] = $row->JO_ID;
+			$sub_array[] = $row->JO_DATEDEDEBU;
+			$sub_array[] = $row->BC_PE;
+			$sub_array[] = $row->BC_CLIENT;
+			$sub_array[] = $row->BC_CODE;
+			$sub_array[] = $row->BC_TYPE;
+			$sub_array[] = $row->BC_TYPEMATIER;
+			$sub_array[] = $row->BC_DIMENSION;
+			$sub_array[] = $row->BC_IMPRESSION;
+			$sub_array[] = $row->BC_ECHANTILLON;
+			$sub_array[] = $row->BC_QUANTITEAPRODUIREENMETRE;
+			$sub_array[] = $row->BC_DIMENSIONPROD;
+			$sub_array[] = $row->BC_POISENKGSAVECMARGE;
+			$sub_array[] = $row->JO_SORTIE;
+			$sub_array[] = $row->JO_AV;
+			$sub_array[] = $sortie->JO_SORTIE - $produit->JO_AV;
+			$sub_array[] = $row->BC_QUNTITE;
+			$sub_array[] = $row->BC_PE;
+			$sub_array[] = $data_machine->MA_VITESSE;
+			$sub_array[] = $row->BC_PE;
+			$sub_array[] = $row->JO_DATEDEDEBU;
+			$sub_array[] = $row->JO_DEB;
+			$sub_array[] = $row->JO_DATEFIN;
+			$sub_array[] = $row->JO_FIN;
+			$sub_array[] = $row->JO_DURE;
+			$sub_array[] = $this->get_rest_time($sortie->JO_SORTIE - $row->JO_AV, $data_machine->MA_VITESSE);
+			$sub_array[] = $row->JO_OBS;
+			$row->JO_ETAT == "ON" ? $sub_array[] = "OUI" : $sub_array[] = "NON";
 
+			$data[] = $sub_array;
+		}
+		$output = array(
+			"data" => $data
+		);
+		echo json_encode($output);
+	}
 
 	public function current_production_sachet_impression()
 	{
@@ -522,6 +574,41 @@ class Planning extends My_Controller
 				break;
 		}
 	}
+	public function update_statut_coupe_prod()
+	{
+		$this->load->model('jobcart_sachet_coupe');
+		$refnum = $this->input->post('refnum');
+		$machine = $this->input->post('machine');
+		$value = $this->input->post('value');
+		$machine = str_replace("_", " ", $machine);
+		$type = $this->input->post('type');
+
+		switch ($type) {
+			case 'mise_en_prod':
+				$param = ["JO_ID" => $refnum, "JO_MACHINE" => $machine];
+				$request = ["JO_ETAT" => "ON"];
+				echo $this->jobcart_sachet_coupe->update_jobcart_sachet_coupe($param, $request);
+				break;
+			case 'terminer':
+				$param = ["JO_ID" => $refnum, "JO_MACHINE" => $machine];
+				$request = ["JO_STATUT" => "TERMINER","JO_IDS"=>""];
+				echo $this->jobcart_sachet_coupe->update_jobcart_sachet_coupe($param, $request);
+				break;
+			case 'prod_terminer':
+				$param = ["JO_ID" => $refnum];
+				$request = ["JO_AV" => $value];
+				echo $this->jobcart_sachet_coupe->update_jobcart_sachet_coupe($param, $request);
+				break;
+			case 'supprimer':
+				$param = ["JO_ID" => $refnum, "JO_MACHINE" => $machine];
+				echo $this->jobcart_sachet_coupe->delete_jobcart_sachet_coupe($param);
+				break;
+
+			default:
+				echo 0;
+				break;
+		}
+	}
 	public function show_form_update_data_prod()
 	{
 		$this->load->model('jobcart_sachet_extrusion');
@@ -575,6 +662,31 @@ class Planning extends My_Controller
 
 				];
 				$this->load->view('planning/Job_card/Sachet/form_update_data_impression_prod', $data);
+			}
+		}
+	}
+
+	public function show_form_update_data_coupe_prod()
+	{
+		$this->load->model('jobcart_sachet_coupe');
+		$this->load->model('commande');
+
+		$refnum = $this->input->get('refnum');
+		$param = [
+			"JO_ID" => $refnum
+		];
+		$donne = $this->jobcart_sachet_coupe->get_detail_jobcart_sachet_coupe($param);
+		$methodOk = $donne != null;
+		if ($methodOk) {
+			$parametre = ["BC_PE" => $donne->BC_PE];
+			$commande = $this->commande->select_commande($parametre);
+			$methodOk =  $commande != null;
+			if ($methodOk) {
+				$data = [
+					'job' => $donne,
+					'commande' => $commande
+				];
+				$this->load->view('planning/Job_card/Sachet/form_update_data_coupe_prod', $data);
 			}
 		}
 	}
@@ -777,8 +889,54 @@ class Planning extends My_Controller
 			}
 		}
 	}
-  
 
+	public function update_date_time_coupe_prod()
+	{
+		$this->load->model('jobcart_sachet_coupe');
+		$this->load->model('global');
+		$rang = $this->input->post('rang');
+
+		$refnum = $this->input->post('refnum');
+		$heure = $this->input->post('heure');
+		$date = $this->input->post('date');
+
+
+		$json = ["error" => "error"];
+		$job_card = $this->jobcart_sachet_coupe->get_detail_jobcart_sachet_coupe(["JO_ID" => $refnum]);
+
+
+		if ($job_card) {
+			$dt = new DateTime($date . " " . $heure);
+			$temp_hours = $job_card->JO_DURE == "" ? "00:00:00" : $job_card->JO_DURE;
+			$dt->modify('+ ' . $this->time_to_sec($temp_hours) . ' seconds');
+			$update_data = [
+				"JO_DEB" => $heure,
+				"JO_DATEDEDEBU" => $date,
+				"JO_FIN" => $dt->format('H:i:s'),
+				"JO_DATEFIN" => $dt->format('Y-m-d')
+			];
+			$methodOk = $this->jobcart_sachet_coupe->update_jobcart_sachet_coupe(["JO_ID" => $refnum], $update_data);
+
+			if ($methodOk) {
+				$dt = new DateTime($date . " " . $heure);
+				$all_job_data = $this->jobcart_sachet_coupe->get_jobcart_sachet_coupe("JO_IDS < $job_card->JO_IDS AND  JO_MACHINE = '$job_card->JO_MACHINE'");
+				$nombre_enregsitrement = $this->global->count_data_result("JO_IDS < $job_card->JO_IDS AND  JO_MACHINE = '$job_card->JO_MACHINE'", 'jobcart_sachet_coupe');
+				foreach ($all_job_data as  $all_job_data) {
+					$all_job_data->JO_DATEFIN = $dt->format('Y-m-d');
+					$all_job_data->JO_FIN = $dt->format('H:i:s');
+					$temp_hours = $all_job_data->JO_DURE == "" ? "00:00:00" : $all_job_data->JO_DURE;
+					$dt->modify("-" . $this->time_to_sec($temp_hours) . "seconde");
+					$all_job_data->JO_DATEDEDEBU = $dt->format('Y-m-d');
+					$all_job_data->JO_DEB = $dt->format('H:i:s');
+					$all_job_data->JO_IDS = $nombre_enregsitrement;
+					$this->jobcart_sachet_coupe->update_jobcart_sachet_coupe(["JO_ID" => $all_job_data->JO_ID], $all_job_data);
+					$nombre_enregsitrement--;
+				}
+			}
+		}
+	}
+  
+	
 	public function print_jobs_cart()
 	{
 		
@@ -958,6 +1116,17 @@ class Planning extends My_Controller
 		$data = ["id_job" => $id_job, "machine" => $machine];
 		$this->load->view('planning/Job_card/sachet/form_add_data_purge', $data);
 	}
+
+	public function show_form_add_data_coupe_prod()
+	{
+		$this->load->model('jobcart_sachet_coupe');
+		$machine = $this->input->get('machine');
+		$machine = str_replace("_", " ", $machine);
+		$id_job = $this->jobcart_sachet_coupe->last_insert_id() + 1;
+		$data = ["id_job" => $id_job, "machine" => $machine];
+		$this->load->view('planning/Job_card/sachet/form_add_data_coupe_prod', $data);
+	}
+
 	public function show_form_add_data_impression_prod()
 	{
 		$this->load->model('jobcart_sachet_impression');
@@ -967,6 +1136,8 @@ class Planning extends My_Controller
 		$data = ["id_job" => $id_job, "machine" => $machine];
 		$this->load->view('planning/Job_card/sachet/form_add_data_prod', $data);
 	}
+
+
      public function show_form_add_data_impression_purge(){
 		$this->load->model('jobcart_sachet_impression');
 		$machine = $this->input->get('machine');
@@ -1002,7 +1173,7 @@ class Planning extends My_Controller
     
 	public function add_job_card_impression_prod()
 	{
-		$this->load->model('jobcart_sachet_extrusion');
+		$this->load->model('jobcart_sachet_impression');
 		$obs = $this->input->post("obs");
 		$machine = $this->input->post('machine');
 		$id_jobs = $this->input->post('id_jobs');
@@ -1023,6 +1194,31 @@ class Planning extends My_Controller
 		];
 		echo $this->jobcart_sachet_impression->insert_jobcart_sachet_impression($param);
 	}
+
+	public function add_job_card_coupe_prod()
+	{
+		$this->load->model('jobcart_sachet_coupe');
+		$obs = $this->input->post("obs");
+		$machine = $this->input->post('machine');
+		$id_jobs = $this->input->post('id_jobs');
+		$refnum = $this->input->post('refnum');
+		$quantite = $this->input->post('quantite');
+		$date_prod = $this->input->post('date_prod');
+		$heure_debut = $this->input->post('heure_debut');
+		$duree_prod = $this->input->post('duree_prod');
+		$date_fin = $this->input->post('date_fin');
+		$heure_fin = $this->input->post('heure_fin');
+		$order = $this->jobcart_sachet_coupe->last_insert_ids(["JO_MACHINE" => $machine]) + 1;
+		$user = $this->session->userdata('matricule');
+		$param = [
+			"JO_IDS" => $order, "JO_ID" => $id_jobs, "BC_PE" => $refnum, "JO_DATE" => date('Y-m-d'), "JO_MACHINE" => $machine,
+			"JO_STATUT" => "PLANIFIER", "JO_CREAT" => $user, "JO_DURE" => $duree_prod,
+			"JO_DEB" => $heure_debut, "JO_FIN" => $heure_fin, "JO_AV" => 0, "JO_DATEFIN" => $date_fin,
+			"JO_DATEDEDEBU" => $date_prod, "JO_ETAT" => "off", "JO_SORTIE" => $quantite,"JO_OBS"=>$obs
+		];
+		echo $this->jobcart_sachet_coupe->insert_jobcart_sachet_coupe($param);
+	}
+
 
 	public function add_new_job_card_prod()
 	{
@@ -1154,6 +1350,53 @@ class Planning extends My_Controller
 			}
 		}
 	}
+
+
+	public function mouve_job_card_coupe_prod()
+	{
+		$this->load->model('jobcart_sachet_coupe');
+		$requette = $this->input->post('data');
+		$machine = $this->input->post("machine");
+		$machine = str_replace("_", " ", $machine);
+		$min_position = array();
+  try{
+		$ini_count = min($requette)[0];
+		$methodOk = false;
+		$data_init = $this->jobcart_sachet_coupe->get_detail_jobcart_sachet_coupe(["JO_MACHINE" => $machine, "JO_IDS" => $ini_count]);
+		foreach ($requette as $requette) {
+			$Position = $requette[1];
+			$refnum = $requette[2];
+			$min_position[] = $Position;
+			$requette = ["JO_ID" => $refnum];
+			$param = ["JO_IDS" => $Position];
+			$methodOk = $this->jobcart_sachet_coupe->update_jobcart_sachet_coupe($requette, $param);
+		}
+
+		$count_postion = count($min_position) - 1;
+		$max_postion = $min_position[$count_postion];
+		$min_position = $min_position[0];
+
+		if ($methodOk) {
+			$dt = new DateTime($data_init->JO_DATEDEDEBU . " " . $data_init->JO_DEB);
+			for ($i = $min_position; $i <= $max_postion; $i++) {
+				$donne = "";
+				$donne = $this->jobcart_sachet_coupe->get_detail_jobcart_sachet_coupe(["JO_MACHINE" => $machine, "JO_IDS" => $i]);
+				$temp_hours = $donne->JO_DURE == "" ? "00:00:00" : $donne->JO_DURE;
+				$donne->JO_DATEDEDEBU = $dt->format('Y-m-d');
+			
+				$donne->JO_DEB = $dt->format('H:i:s');
+				$dt->modify("+" . $this->time_to_sec($temp_hours) . "seconde");
+				$donne->JO_DATEFIN = $dt->format('Y-m-d');
+				$donne->JO_FIN = $dt->format('H:i:s');
+				$this->jobcart_sachet_coupe->update_jobcart_sachet_coupe(["JO_MACHINE" => $machine, "JO_IDS" => $i], $donne);
+			}
+		}
+	} catch (Exception $e) {
+		echo 'Caught exception: ',  $e->getMessage(), "\n";
+	}
+	}
+
+	
 	public function Recap_machine()
 	{
 		$this->load->model('machine');

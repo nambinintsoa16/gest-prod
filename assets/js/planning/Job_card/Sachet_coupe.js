@@ -16,7 +16,7 @@ $(document).ready(function() {
                 url: base_url + "assets/dataTableFr/french.json",
             },
             ajax: base_url +
-                "Planning/current_production_extrusion?machine=" +
+                "Planning/current_production_sachet_coupe?machine=" +
                 current_element,
             dom: 'Bfrtip',
             buttons: [{
@@ -143,9 +143,9 @@ $(document).ready(function() {
                 data[i][1] = position;
                 data[i][2] = refnum;
             }
-            $.post(base_url + "planning/mouve_job_card_prod", { data, machine }, function(reponse) {
+            $.post(base_url + "planning/mouve_job_card_coupe_prod", { data, machine }, function(reponse) {
                 table = $("#" + machine).DataTable();
-                let link = base_url + "Planning/current_production_extrusion?machine=" + machine;
+                let link = base_url + "Planning/current_production_sachet_coupe?machine=" + machine;
                 table.ajax.url(link);
                 table.ajax.reload();
             });
@@ -158,7 +158,7 @@ $(document).ready(function() {
         let type = $(this).attr("type");
         table = $("#" + machine).DataTable();
         let link =
-            base_url + "Planning/current_production_extrusion?machine=" + machine;
+            base_url + "Planning/current_production_sachet_coupe?machine=" + machine;
         $.confirm({
             title: "",
             content: '<fieldset class="border p-2 text-left"><span style="color: #2a5591;">Entrée refnum job card :</span> <input type="number" id="refnum" class="form-control form-control-sm"></p></fieldset>',
@@ -175,7 +175,7 @@ $(document).ready(function() {
                             return false;
                         }
                         $.post(
-                            base_url + "Planning/update_statut_prod", { refnum, machine, type },
+                            base_url + "Planning/update_statut_coupe_prod", { refnum, machine, type },
                             function() {
                                 table.ajax.url(link);
                                 table.ajax.reload();
@@ -205,7 +205,7 @@ $(document).ready(function() {
         let machine = $(this).attr("machine");
         $.confirm({
             title: "",
-            content: "url:" + base_url + "planning/show_form_nouveau_processus?machine=" + machine,
+            content: "url:" + base_url + "planning/show_form_nouveau_impression_processus?machine=" + machine,
             columnClass: "col-md-8",
             buttons: {
                 formSubmit: {
@@ -284,7 +284,7 @@ $(document).ready(function() {
             type: "blue",
             content: "url:" +
                 base_url +
-                "planning/show_form_update_data_prod?machine=" +
+                "planning/show_form_update_data_coupe_prod?machine=" +
                 machine +
                 "&refnum=" +
                 refnum,
@@ -306,7 +306,7 @@ $(document).ready(function() {
                         table = $("#" + machine).DataTable();
                         let link =
                             base_url +
-                            "Planning/current_production_extrusion?machine=" +
+                            "Planning/current_production_sachet_coupe?machine=" +
                             machine;
                         table.ajax.url(link);
                         table.ajax.reload();
@@ -325,7 +325,7 @@ $(document).ready(function() {
             type: "blue",
             content: "url:" +
                 base_url +
-                "planning/show_form_add_data_purge?machine=" +
+                "planning/show_form_add_data_impression_purge?machine=" +
                 machine_id,
             columnClass: "col-md-6",
             onContentReady: function() {
@@ -349,10 +349,10 @@ $(document).ready(function() {
                         let date_fin = this.$content.find('#date_fin').val();
                         let heure_fin = this.$content.find('#heure_fin').val();
                         let obs = this.$content.find("#type").val();
-                        $.post(base_url + "Planning/add_job_card_prod", { obs, machine, id_jobs, refnum, quantite, date_prod, heure_debut, duree_prod, date_fin, heure_fin }, function(data) {
+                        $.post(base_url + "Planning/add_job_card_impression_prod", { obs, machine, id_jobs, refnum, quantite, date_prod, heure_debut, duree_prod, date_fin, heure_fin }, function(data) {
                             if (data == 1) {
                                 table = $("#" + machine_id).DataTable();
-                                let link = base_url + "Planning/current_production_extrusion?machine=" + machine_id;
+                                let link = base_url + "Planning/current_production_sachet_coupe?machine=" + machine_id;
                                 table.ajax.url(link);
                                 table.ajax.reload();
                             }
@@ -379,7 +379,7 @@ $(document).ready(function() {
             type: "blue",
             content: "url:" +
                 base_url +
-                "planning/show_form_add_data_prod?machine=" +
+                "planning/show_form_add_data_coupe_prod?machine=" +
                 machine_id,
             columnClass: "col-md-6",
             onContentReady: function() {
@@ -402,10 +402,10 @@ $(document).ready(function() {
                         let duree_prod = this.$content.find('#duree_prod').val();
                         let date_fin = this.$content.find('#date_fin').val();
                         let heure_fin = this.$content.find('#heure_fin').val();
-                        $.post(base_url + "Planning/add_job_card_prod", { machine, id_jobs, refnum, quantite, date_prod, heure_debut, duree_prod, date_fin, heure_fin }, function(data) {
+                        $.post(base_url + "Planning/add_job_card_coupe_prod", { machine, id_jobs, refnum, quantite, date_prod, heure_debut, duree_prod, date_fin, heure_fin }, function(data) {
                             if (data == 1) {
                                 table = $("#" + machine_id).DataTable();
-                                let link = base_url + "Planning/current_production_extrusion?machine=" + machine_id;
+                                let link = base_url + "Planning/current_production_sachet_coupe?machine=" + machine_id;
                                 table.ajax.url(link);
                                 table.ajax.reload();
                             }
@@ -428,7 +428,7 @@ $(document).ready(function() {
         let machine = $(this).attr("machine");
         table = $("#" + machine).DataTable();
         let link =
-            base_url + "Planning/current_production_extrusion?machine=" + machine;
+            base_url + "Planning/current_production_sachet_coupe?machine=" + machine;
         let html_content =
             '<span style="color: #2a5591;">Entrée refnum job card :</span> <input type="number" id="refnum" class="form-control form-control-sm">';
         html_content +=
@@ -461,7 +461,7 @@ $(document).ready(function() {
                         }
                         loding();
                         $.post(
-                            base_url + "Planning/update_date_time_prod", { refnum, heure, date },
+                            base_url + "Planning/update_date_time_coupe_prod", { refnum, heure, date },
                             function(data) {
                                 stop_load();
                                 table.ajax.url(link);
